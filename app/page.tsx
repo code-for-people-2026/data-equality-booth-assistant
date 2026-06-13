@@ -63,28 +63,32 @@ export default function Home() {
       return { summary: conversationSummary, messages: nextMessages };
     }
 
-    const response = await fetch("/api/summarize", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        previousSummary: conversationSummary,
-        messages: messagesForSummary(nextMessages),
-      }),
-    });
+    try {
+      const response = await fetch("/api/summarize", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          previousSummary: conversationSummary,
+          messages: messagesForSummary(nextMessages),
+        }),
+      });
 
-    if (!response.ok) {
+      if (!response.ok) {
+        return { summary: conversationSummary, messages: nextMessages };
+      }
+
+      const data = await readJson(response);
+      if (!data.summary) {
+        return { summary: conversationSummary, messages: nextMessages };
+      }
+
+      setConversationSummary(data.summary);
+      const recent = recentMessagesAfterSummary(nextMessages);
+      setMessages(recent);
+      return { summary: data.summary, messages: recent };
+    } catch {
       return { summary: conversationSummary, messages: nextMessages };
     }
-
-    const data = await readJson(response);
-    if (!data.summary) {
-      return { summary: conversationSummary, messages: nextMessages };
-    }
-
-    setConversationSummary(data.summary);
-    const recent = recentMessagesAfterSummary(nextMessages);
-    setMessages(recent);
-    return { summary: data.summary, messages: recent };
   }
 
   async function sendMessage(content: string) {

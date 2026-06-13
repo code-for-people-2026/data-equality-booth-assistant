@@ -9,7 +9,7 @@ export function ContinuePanel() {
       </summary>
       <div className="continue-body">
         <p>如果你想继续聊，可以等摊主空下来直接问。</p>
-        <p>官网、文档和联系方式会放在这里。活动前把二维码图片或链接替换进来即可。</p>
+        <p>这里会放摊位现场提供的官网、文档或联系方式入口；也可以先让 AI 帮你把问题整理清楚。</p>
       </div>
     </details>
   );
