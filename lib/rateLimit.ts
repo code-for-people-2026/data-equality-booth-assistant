@@ -40,3 +40,8 @@ export const chatRateLimiter = createRateLimiter({
   perMinute: parsePositiveInteger(process.env.CHAT_RATE_LIMIT_PER_MINUTE, 10),
   perHour: parsePositiveInteger(process.env.CHAT_RATE_LIMIT_PER_HOUR, 100),
 });
+
+export const summarizeRateLimiter = createRateLimiter({
+  perMinute: parsePositiveInteger(process.env.SUMMARY_RATE_LIMIT_PER_MINUTE, 20),
+  perHour: parsePositiveInteger(process.env.SUMMARY_RATE_LIMIT_PER_HOUR, 200),
+});
