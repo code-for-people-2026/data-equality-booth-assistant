@@ -42,7 +42,7 @@ async function readJson(response: Response): Promise<{ answer?: string; error?: 
 }
 
 export default function Home() {
-  const [mode, setMode] = useState<EntryMode>("free");
+  const [mode, setMode] = useState<EntryMode>("intro");
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [conversationSummary, setConversationSummary] = useState("");
   const [loading, setLoading] = useState(false);

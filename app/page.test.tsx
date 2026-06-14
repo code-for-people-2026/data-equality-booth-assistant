@@ -66,6 +66,31 @@ describe("Home", () => {
     );
   });
 
+  it("uses the intro mode when visitors ask directly from the entry screen", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ answer: "这是一个基于摊位材料的回答。" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Home />);
+    await user.type(screen.getByLabelText("输入问题"), "这个项目是做什么的？");
+    await user.click(screen.getByRole("button", { name: "发送" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("这是一个基于摊位材料的回答。")).toBeInTheDocument();
+    });
+
+    const [, request] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const body = JSON.parse(request.body as string) as { mode: string; messages: unknown[] };
+
+    expect(body.mode).toBe("intro");
+    expect(body.messages).toHaveLength(0);
+  });
+
   it("sends the current question separately from prior context", async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn().mockResolvedValue(
