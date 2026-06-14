@@ -5,6 +5,7 @@ import { ChatMessage } from "@/components/ChatMessage";
 import { ContinuePanel } from "@/components/ContinuePanel";
 import { EntryScreen } from "@/components/EntryScreen";
 import { StatusNotice } from "@/components/StatusNotice";
+import { Button } from "@/components/ui/button";
 import {
   compactMessagesForRequest,
   messagesForSummary,
@@ -202,9 +203,16 @@ export default function Home() {
         <section className="chat-shell" aria-label="对话">
           <div className="chat-header">
             <span>数据平权，AI 下乡</span>
-            <button className="reset-chat" type="button" onClick={resetConversation} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="rounded-full bg-popover px-2.5 text-muted-foreground hover:text-foreground"
+              onClick={resetConversation}
+              disabled={loading}
+            >
               重新开始
-            </button>
+            </Button>
           </div>
           <div className="message-list">
             {messages.map((message) => (

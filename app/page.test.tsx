@@ -31,10 +31,17 @@ describe("Home", () => {
   it("shows the booth assistant entry screen", () => {
     render(<Home />);
 
-    expect(screen.getByRole("heading", { name: "数据平权，AI 下乡" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "我先看看这是啥" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "摊位助手" })).toBeInTheDocument();
+    expect(screen.getByText("数据平权，AI 下乡")).toBeInTheDocument();
+    expect(screen.getByText(/材料没有覆盖的内容，会明确说明边界/)).toBeInTheDocument();
+    expect(screen.queryByText(/说不清的地方会说清楚/)).not.toBeInTheDocument();
+    expect(screen.getByPlaceholderText("向摊位助手提问...")).toBeInTheDocument();
+    expect(screen.getByText("内容由 AI 生成，请仔细甄别")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "我先看看这是啥" })).toHaveClass("inline-flex");
     expect(screen.getByRole("button", { name: "我有点怀疑" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "我想继续聊" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "发送" })).toHaveClass("size-12", "rounded-full");
+    expect(screen.getByText("继续了解").closest("details")).toHaveClass("rounded-[calc(var(--radius)-4px)]", "border");
   });
 
   it("keeps the visual direction out of the page copy", () => {
