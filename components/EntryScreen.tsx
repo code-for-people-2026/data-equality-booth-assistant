@@ -13,6 +13,7 @@ const entryOptions: Array<{ mode: EntryMode; label: string }> = [
 export function EntryScreen({ onSelectMode }: EntryScreenProps) {
   return (
     <section className="entry-screen">
+      <p className="lab-identity">PUBLIC AI LAB / 公共智能实验室</p>
       <p className="eyebrow">为工友敲键盘的摊位助手</p>
       <h1>数据平权，AI 下乡</h1>
       <p className="entry-copy">
