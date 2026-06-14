@@ -89,6 +89,7 @@ textarea:disabled {
 }
 
 .entry-screen {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -97,15 +98,12 @@ textarea:disabled {
   min-height: 62dvh;
 }
 
-.lab-identity {
-  width: fit-content;
-  margin: 0 0 6px;
-  border-left: 3px solid var(--accent);
-  padding: 4px 0 4px 10px;
-  color: var(--carbon);
-  font-size: 12px;
-  font-weight: 720;
-  letter-spacing: 0.08em;
+.entry-screen::before {
+  content: "";
+  width: 3px;
+  height: 26px;
+  margin-bottom: 4px;
+  background: var(--accent);
 }
 
 .eyebrow {
@@ -175,19 +173,13 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 3px;
+  border-left: 3px solid var(--accent);
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(10px);
-  padding: 8px 0 12px;
+  padding: 8px 0 12px 10px;
   color: var(--carbon);
   font-size: 14px;
   border-bottom: 1px solid rgba(15, 17, 16, 0.08);
-}
-
-.chat-lab {
-  color: var(--accent);
-  font-size: 11px;
-  font-weight: 720;
-  letter-spacing: 0.08em;
 }
 
 .message-list {
