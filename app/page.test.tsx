@@ -37,6 +37,8 @@ describe("Home", () => {
 
     expect(screen.getByText(/怀疑很正常/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "我先看看这是啥" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/PUBLIC AI LAB/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/公共智能实验室/)).not.toBeInTheDocument();
   });
 
   it("sends a chat message and displays the assistant response", async () => {
