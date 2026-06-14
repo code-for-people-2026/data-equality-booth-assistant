@@ -1,14 +1,22 @@
 :root {
   color-scheme: light;
-  --bg: #f7f7f4;
-  --panel: #ffffff;
-  --text: #191919;
-  --muted: #62625e;
-  --border: #ddddd6;
-  --accent: #136f63;
+  --bg: #fbfaf6;
+  --paper: #fffdf8;
+  --panel: rgba(255, 253, 248, 0.92);
+  --carbon: #0f1110;
+  --carbon-2: #171717;
+  --text: #171717;
+  --muted: #68655e;
+  --border: rgba(15, 17, 16, 0.14);
+  --border-strong: rgba(15, 17, 16, 0.28);
+  --accent: #8b1e2d;
   --accent-ink: #ffffff;
-  --assistant: #ffffff;
-  --user: #e9f4ef;
+  --cyan: #4db4c8;
+  --gold: #c2a45a;
+  --green: #3f8060;
+  --assistant: rgba(255, 253, 248, 0.96);
+  --user: #eef5ef;
+  --shadow: 0 18px 45px rgba(15, 17, 16, 0.08);
 }
 
 * {
@@ -22,7 +30,10 @@ body {
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    linear-gradient(rgba(15, 17, 16, 0.035) 1px, transparent 1px) 0 0 / 28px 28px,
+    linear-gradient(90deg, rgba(15, 17, 16, 0.035) 1px, transparent 1px) 0 0 / 28px 28px,
+    var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
 }
@@ -42,12 +53,39 @@ textarea:disabled {
 }
 
 .app-shell {
+  position: relative;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   max-width: 760px;
   margin: 0 auto;
-  padding: 24px 16px 96px;
+  padding: 20px 16px 100px;
+  isolation: isolate;
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  left: 50%;
+  top: 0;
+  z-index: -1;
+  width: min(100%, 760px);
+  height: 10px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, var(--accent), var(--carbon) 42%, var(--green));
+}
+
+.app-shell::after {
+  content: "";
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: -1;
+  width: min(100%, 760px);
+  height: 160px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, rgba(251, 250, 246, 0), rgba(15, 17, 16, 0.08));
+  pointer-events: none;
 }
 
 .entry-screen {
@@ -55,21 +93,34 @@ textarea:disabled {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 18px;
+  gap: 16px;
   min-height: 62dvh;
+}
+
+.lab-identity {
+  width: fit-content;
+  margin: 0 0 6px;
+  border-left: 3px solid var(--accent);
+  padding: 4px 0 4px 10px;
+  color: var(--carbon);
+  font-size: 12px;
+  font-weight: 720;
+  letter-spacing: 0.08em;
 }
 
 .eyebrow {
   margin: 0;
   color: var(--muted);
-  font-size: 14px;
+  font-size: 13px;
+  letter-spacing: 0.02em;
 }
 
 h1 {
   margin: 0;
-  font-size: 34px;
-  line-height: 1.15;
-  font-weight: 760;
+  color: var(--carbon);
+  font-size: 36px;
+  line-height: 1.08;
+  font-weight: 780;
   letter-spacing: 0;
 }
 
@@ -78,25 +129,36 @@ h1 {
   color: var(--muted);
   line-height: 1.75;
   font-size: 16px;
+  max-width: 22rem;
+  overflow-wrap: anywhere;
 }
 
 .entry-actions {
   display: grid;
   gap: 10px;
+  margin-top: 4px;
 }
 
 .entry-actions button {
-  min-height: 48px;
+  min-height: 52px;
   border: 1px solid var(--border);
-  background: var(--panel);
+  border-left: 3px solid var(--accent);
+  background:
+    linear-gradient(90deg, rgba(139, 30, 45, 0.055), transparent 36%),
+    var(--panel);
   color: var(--text);
-  border-radius: 8px;
+  border-radius: 4px;
   text-align: left;
-  padding: 0 14px;
+  padding: 0 15px;
+  box-shadow: var(--shadow);
 }
 
 .entry-actions button:active {
   transform: translateY(1px);
+}
+
+.entry-actions button:hover {
+  border-color: var(--border-strong);
 }
 
 .chat-shell {
@@ -110,11 +172,22 @@ h1 {
   position: sticky;
   top: 0;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
   background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(10px);
   padding: 8px 0 12px;
-  color: var(--muted);
+  color: var(--carbon);
   font-size: 14px;
+  border-bottom: 1px solid rgba(15, 17, 16, 0.08);
+}
+
+.chat-lab {
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 720;
+  letter-spacing: 0.08em;
 }
 
 .message-list {
@@ -126,18 +199,23 @@ h1 {
 
 .message {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 12px 13px;
   line-height: 1.7;
+  box-shadow: 0 10px 28px rgba(15, 17, 16, 0.05);
 }
 
 .message-assistant {
-  background: var(--assistant);
+  border-left: 3px solid var(--accent);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.96), rgba(255, 253, 248, 0.9)),
+    var(--assistant);
 }
 
 .message-user {
   align-self: flex-end;
   width: min(94%, 620px);
+  border-color: rgba(63, 128, 96, 0.25);
   background: var(--user);
 }
 
@@ -154,9 +232,10 @@ h1 {
 
 .continue-panel {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   background: var(--panel);
   margin: 12px 0;
+  box-shadow: 0 10px 28px rgba(15, 17, 16, 0.05);
 }
 
 .continue-panel summary {
@@ -167,6 +246,7 @@ h1 {
   padding: 0 12px;
   color: var(--muted);
   cursor: pointer;
+  border-left: 3px solid var(--gold);
 }
 
 .continue-body {
@@ -196,7 +276,9 @@ h1 {
   grid-template-columns: minmax(0, 1fr) 44px;
   gap: 8px;
   padding: 10px 16px 16px;
-  background: color-mix(in srgb, var(--bg) 94%, transparent);
+  background:
+    linear-gradient(90deg, rgba(139, 30, 45, 0.12), transparent 18%, rgba(77, 180, 200, 0.1)),
+    color-mix(in srgb, var(--paper) 94%, transparent);
   border-top: 1px solid var(--border);
   backdrop-filter: blur(10px);
 }
@@ -207,7 +289,7 @@ h1 {
   min-height: 44px;
   max-height: 120px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 10px 12px;
   background: var(--panel);
   color: var(--text);
@@ -216,14 +298,15 @@ h1 {
 
 .composer textarea:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(139, 30, 45, 0.1);
 }
 
 .composer button {
   width: 44px;
   height: 44px;
   border: 0;
-  border-radius: 8px;
-  background: var(--accent);
+  border-radius: 999px;
+  background: var(--carbon);
   color: var(--accent-ink);
   display: inline-flex;
   align-items: center;
@@ -240,6 +323,6 @@ h1 {
   }
 
   h1 {
-    font-size: 44px;
+    font-size: 48px;
   }
 }

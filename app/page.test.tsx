@@ -11,10 +11,21 @@ describe("Home", () => {
   it("shows the booth assistant entry screen", () => {
     render(<Home />);
 
+    expect(screen.getByText("PUBLIC AI LAB / 公共智能实验室")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "数据平权，AI 下乡" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "我先看看这是啥" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "我有点怀疑" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "我想继续聊" })).toBeInTheDocument();
+  });
+
+  it("keeps the app simple instead of adding document panels", () => {
+    render(<Home />);
+
+    expect(screen.queryByText(/DOC 01/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/SPEC 02/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ATLAS 03/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/分析记录/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/约束检查/)).not.toBeInTheDocument();
   });
 
   it("starts with the doubt opening message", async () => {

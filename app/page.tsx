@@ -133,6 +133,7 @@ export default function Home() {
       {started ? (
         <section className="chat-shell" aria-label="对话">
           <div className="chat-header">
+            <span className="chat-lab">PUBLIC AI LAB / 公共智能实验室</span>
             <span>数据平权，AI 下乡</span>
           </div>
           <div className="message-list">
