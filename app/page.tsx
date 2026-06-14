@@ -13,7 +13,13 @@ import {
   type ChatMessage as ChatMessageType,
   type EntryMode,
 } from "@/lib/chat/conversation";
-import { useState } from "react";
+import {
+  clearStoredConversation,
+  getBrowserStorage,
+  loadStoredConversation,
+  saveStoredConversation,
+} from "@/lib/chat/localConversation";
+import { useEffect, useState } from "react";
 
 const openingMessages: Record<EntryMode, string> = {
   intro:
@@ -47,14 +53,76 @@ export default function Home() {
   const [conversationSummary, setConversationSummary] = useState("");
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState("");
+  const [storageReady, setStorageReady] = useState(false);
 
   const started = messages.length > 0;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    queueMicrotask(() => {
+      if (cancelled) {
+        return;
+      }
+
+      const storage = getBrowserStorage();
+      const restored = storage ? loadStoredConversation(storage) : null;
+      if (restored) {
+        setMode(restored.mode);
+        setMessages(restored.messages);
+        setConversationSummary(restored.conversationSummary);
+      }
+      setStorageReady(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!storageReady) {
+      return;
+    }
+
+    const storage = getBrowserStorage();
+    if (!storage) {
+      return;
+    }
+
+    if (messages.length === 0 && !conversationSummary) {
+      clearStoredConversation(storage);
+      return;
+    }
+
+    saveStoredConversation(storage, {
+      mode,
+      messages,
+      conversationSummary,
+    });
+  }, [conversationSummary, messages, mode, storageReady]);
 
   function startWithMode(nextMode: EntryMode) {
     setMode(nextMode);
     const opening = openingMessages[nextMode];
     if (opening) {
       setMessages([createMessage("assistant", opening)]);
+    }
+  }
+
+  function resetConversation() {
+    const hasUserMessages = messages.some((message) => message.role === "user");
+    if (hasUserMessages && !window.confirm("清空这次对话？内容只保存在本机浏览器。")) {
+      return;
+    }
+
+    setMode("intro");
+    setMessages([]);
+    setConversationSummary("");
+    setNotice("");
+    const storage = getBrowserStorage();
+    if (storage) {
+      clearStoredConversation(storage);
     }
   }
 
@@ -134,6 +202,9 @@ export default function Home() {
         <section className="chat-shell" aria-label="对话">
           <div className="chat-header">
             <span>数据平权，AI 下乡</span>
+            <button className="reset-chat" type="button" onClick={resetConversation} disabled={loading}>
+              重新开始
+            </button>
           </div>
           <div className="message-list">
             {messages.map((message) => (
