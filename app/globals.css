@@ -98,14 +98,6 @@ textarea:disabled {
   min-height: 62dvh;
 }
 
-.entry-screen::before {
-  content: "";
-  width: 3px;
-  height: 26px;
-  margin-bottom: 4px;
-  background: var(--accent);
-}
-
 .eyebrow {
   margin: 0;
   color: var(--muted);
