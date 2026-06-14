@@ -86,6 +86,59 @@ describe("Home", () => {
     );
   });
 
+  it("renders assistant markdown without treating user markdown as formatting", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ answer: "**重点**\n\n- 第一条\n- 第二条\n\n<script>alert('x')</script>" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Home />);
+    await user.type(screen.getByLabelText("输入问题"), "**这会被原样显示吗？**");
+    await user.click(screen.getByRole("button", { name: "发送" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("重点").tagName).toBe("STRONG");
+    });
+    expect(screen.getByText("第一条").closest("li")).not.toBeNull();
+    expect(screen.getByText("第二条").closest("li")).not.toBeNull();
+    expect(screen.getByText("**这会被原样显示吗？**")).toBeInTheDocument();
+    expect(screen.queryByText(/alert/)).not.toBeInTheDocument();
+  });
+
+  it("limits assistant markdown to the supported document elements", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          answer:
+            "# 大标题\n\n![图](https://example.com/image.png)\n\n| A | B |\n| - | - |\n| 1 | 2 |\n\n- [x] 任务",
+        }),
+        {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        },
+      ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Home />);
+    await user.type(screen.getByLabelText("输入问题"), "测试支持哪些 Markdown");
+    await user.click(screen.getByRole("button", { name: "发送" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("任务")).toBeInTheDocument();
+    });
+    expect(document.body).toHaveTextContent("大标题");
+    expect(screen.queryByRole("heading", { name: "大标题" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("img", { name: "图" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("table")).not.toBeInTheDocument();
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+  });
+
   it("uses the intro mode when visitors ask directly from the entry screen", async () => {
     const user = userEvent.setup();
     const fetchMock = vi.fn().mockResolvedValue(
