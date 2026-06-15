@@ -28,6 +28,7 @@ describe("public knowledge base", () => {
     expect(docs.find((doc) => doc.id === "data-equality")?.sources).toContain("source-data-equality-manifesto");
     expect(docs.find((doc) => doc.id === "cattle-license")?.sources).toContain("source-cattle-license");
     expect(docs.find((doc) => doc.id === "direction-map")?.sources).toContain("source-direction-map-handout");
+    expect(docs.find((doc) => doc.id === "direction-map")?.sources).toContain("source-7x7-capability-theory");
     expect(docs.find((doc) => doc.id === "event-positioning")?.sources).toContain("source-booth-conversation-notes");
   });
 
@@ -62,6 +63,9 @@ describe("public knowledge base", () => {
     );
     expect(retrieve("7x7 表格里 B3 建筑工欠薪是什么", chunks, { limit: 1 })[0]?.chunk.sourceId).toBe(
       "source-direction-map-handout",
+    );
+    expect(retrieve("7x7 纵轴为什么按被剥夺的能力划分，能力进路和努斯鲍姆是什么", chunks, { limit: 1 })[0]?.chunk.sourceId).toBe(
+      "source-7x7-capability-theory",
     );
     expect(retrieve("生产和消费那张传单讲的空着的一格是什么", chunks, { limit: 1 })[0]?.chunk.sourceId).toBe(
       "source-production-vs-consumption",
