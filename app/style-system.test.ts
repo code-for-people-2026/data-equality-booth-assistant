@@ -2,6 +2,31 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 describe("style system", () => {
+  it("tracks the website light and dark color system", () => {
+    const css = readFileSync("app/globals.css", "utf8");
+
+    expect(css).toContain("--bg: #f7f9fc");
+    expect(css).toContain("--paper: #fffefa");
+    expect(css).toContain("--soft: #eef3f7");
+    expect(css).toContain("--ink: #101417");
+    expect(css).toContain("--bg: #07090d");
+    expect(css).toContain("--paper: #101722");
+    expect(css).toContain("--ink: #f6f7f2");
+  });
+
+  it("does not use red and green as the main chat contrast", () => {
+    const css = readFileSync("app/globals.css", "utf8");
+    const topStripBlock = css.match(/\.app-shell::before\s*{[^}]+}/)?.[0] ?? "";
+    const assistantBlock = css.match(/\.message-assistant\s*{[^}]+}/)?.[0] ?? "";
+    const userBlock = css.match(/\.message-user\s*{[^}]+}/)?.[0] ?? "";
+
+    expect(topStripBlock).toContain("var(--gold-bright)");
+    expect(topStripBlock).toContain("var(--cyan)");
+    expect(topStripBlock).not.toContain("var(--green)");
+    expect(assistantBlock).not.toContain("border-left: 3px solid var(--accent)");
+    expect(userBlock).not.toContain("rgba(63, 128, 96");
+  });
+
   it("does not hard-code a light assistant message surface", () => {
     const css = readFileSync("app/globals.css", "utf8");
     const assistantBlock = css.match(/\.message-assistant\s*{[^}]+}/)?.[0] ?? "";
