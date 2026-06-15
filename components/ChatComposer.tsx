@@ -23,9 +23,9 @@ export function ChatComposer({ disabled, onSend }: ChatComposerProps) {
   }
 
   return (
-    <div className="fixed bottom-2.5 left-1/2 grid w-[min(calc(100%-24px),720px)] -translate-x-1/2 gap-2">
+    <div className="composer-shell">
       <form
-        className="grid grid-cols-[minmax(0,1fr)_48px] items-end gap-2.5 rounded-[28px] border border-input bg-popover/95 p-3.5 shadow-panel backdrop-blur-[18px] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/30"
+        className="grid grid-cols-[minmax(0,1fr)_48px] items-end gap-2.5 rounded-[28px] border border-input bg-popover p-3.5 shadow-panel backdrop-blur-[18px] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/30"
         onSubmit={submit}
       >
         <textarea
@@ -47,8 +47,10 @@ export function ChatComposer({ disabled, onSend }: ChatComposerProps) {
         >
           <Send aria-hidden="true" size={18} />
         </Button>
+        <p className="col-span-2 m-0 text-center text-xs leading-none text-muted-foreground">
+          内容由 AI 生成，请仔细甄别
+        </p>
       </form>
-      <p className="m-0 text-center text-xs leading-none text-muted-foreground">内容由 AI 生成，请仔细甄别</p>
     </div>
   );
 }

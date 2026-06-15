@@ -41,6 +41,7 @@ describe("Home", () => {
     expect(screen.getByRole("button", { name: "我有点怀疑" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "我想继续聊" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "发送" })).toHaveClass("size-12", "rounded-full");
+    expect(screen.getByText("内容由 AI 生成，请仔细甄别").closest("form")).toBe(screen.getByRole("button", { name: "发送" }).closest("form"));
     expect(screen.getByText("继续了解").closest("details")).toHaveClass("rounded-[calc(var(--radius)-4px)]", "border");
   });
 

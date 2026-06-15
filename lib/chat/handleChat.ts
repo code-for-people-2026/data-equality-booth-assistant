@@ -13,6 +13,10 @@ type HandleChatInput = {
   loadChunks?: typeof loadKnowledgeChunks;
 };
 
+function wantsExpandedSourceAnswer(message: string) {
+  return /全文|完整版|原文|完整|全部/.test(message);
+}
+
 export async function handleChat(input: HandleChatInput) {
   const limit = chatRateLimiter.check(input.ip, input.now);
   if (!limit.allowed) {
@@ -27,12 +31,13 @@ export async function handleChat(input: HandleChatInput) {
   let timeout: ReturnType<typeof setTimeout> | undefined;
   try {
     const chunks = await (input.loadChunks ?? loadKnowledgeChunks)();
+    const shouldExpandSourceAnswer = wantsExpandedSourceAnswer(parsed.data.message);
     const retrievedChunks = retrieve(
       `${parsed.data.message}\n${parsed.data.conversationSummary}\n${parsed.data.messages
         .map((message) => message.content)
         .join("\n")}`,
       chunks,
-      { limit: 6, minimumScore: 1 },
+      { limit: shouldExpandSourceAnswer ? 12 : 6, minimumScore: 1 },
     );
 
     const system = buildChatPrompt({
@@ -51,7 +56,7 @@ export async function handleChat(input: HandleChatInput) {
     timeout = setTimeout(() => controller.abort(), 20_000);
     const answer = await (input.callModel ?? callDeepSeek)({
       messages,
-      maxTokens: 700,
+      maxTokens: shouldExpandSourceAnswer ? 1200 : 700,
       signal: controller.signal,
     });
 

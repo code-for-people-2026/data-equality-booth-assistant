@@ -16,8 +16,11 @@ export function buildChatPrompt(input: {
   const materials = input.retrievedChunks.length
     ? input.retrievedChunks
         .map(
-          (item, index) =>
-            `材料 ${index + 1}\n标题：${item.chunk.title}\n来源ID：${item.chunk.sourceId}\n内容：${item.chunk.text}`,
+          (item, index) => {
+            const sourcePath = item.chunk.sourcePath ? `\n原始来源：${item.chunk.sourcePath}` : "";
+            const relatedSources = item.chunk.sources.length ? `\n关联来源：${item.chunk.sources.join("、")}` : "";
+            return `材料 ${index + 1}\n标题：${item.chunk.title}\n材料类型：${item.chunk.kind}\n来源ID：${item.chunk.sourceId}${sourcePath}${relatedSources}\n内容：${item.chunk.text}`;
+          },
         )
         .join("\n\n")
     : "没有检索到足够相关的摊位材料。";

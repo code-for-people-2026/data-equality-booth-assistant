@@ -12,6 +12,8 @@ describe("buildChatPrompt", () => {
             id: "ai#0",
             sourceId: "why-ai",
             title: "为什么是 AI",
+            kind: "topic",
+            sources: [],
             tags: ["AI"],
             text: "AI 可能被用来提高监控和管理强度。",
             filePath: "/knowledge/why-ai.md",
@@ -26,6 +28,31 @@ describe("buildChatPrompt", () => {
     expect(prompt).toContain("当前入口模式：我有点怀疑");
     expect(prompt).toContain("为什么是 AI");
     expect(prompt).toContain("AI 可能被用来提高监控和管理强度");
+  });
+
+  it("includes traceable source metadata when retrieved material comes from a source document", () => {
+    const prompt = buildChatPrompt({
+      mode: "free",
+      retrievedChunks: [
+        {
+          chunk: {
+            id: "source-manifesto#0",
+            sourceId: "source-manifesto",
+            title: "数据平权宣言全文",
+            kind: "source",
+            sourcePath: "ideal/第一个产品/宣言-数据平权.md",
+            sources: ["ideal/第一个产品/宣言-数据平权.md"],
+            tags: ["数据平权", "原文"],
+            text: "一个幽灵，数据平权的幽灵，正在互联网上游荡。",
+            filePath: "/knowledge/sources/source-data-equality-manifesto.md",
+          },
+          score: 8,
+        },
+      ],
+    });
+
+    expect(prompt).toContain("材料类型：source");
+    expect(prompt).toContain("原始来源：ideal/第一个产品/宣言-数据平权.md");
   });
 });
 
