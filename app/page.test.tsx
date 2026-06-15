@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Home from "./page";
@@ -92,6 +92,81 @@ describe("Home", () => {
         method: "POST",
       }),
     );
+  });
+
+  it("sends the composer message with Enter", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ answer: "Enter 已发送。" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Home />);
+    await user.type(screen.getByLabelText("输入问题"), "按 Enter 发送");
+    await user.keyboard("{Enter}");
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+    expect(await screen.findByText("Enter 已发送。")).toBeInTheDocument();
+  });
+
+  it("keeps Shift+Enter as a newline without sending", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Home />);
+    const textarea = screen.getByLabelText("输入问题");
+    await user.type(textarea, "第一行");
+    await user.keyboard("{Shift>}{Enter}{/Shift}第二行");
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(textarea).toHaveValue("第一行\n第二行");
+  });
+
+  it("keeps Enter as a newline on coarse pointer devices", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn();
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn().mockImplementation((query: string) => ({
+        matches: query === "(pointer: coarse)",
+        media: query,
+        onchange: null,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      })),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Home />);
+    const textarea = screen.getByLabelText("输入问题");
+    await user.type(textarea, "手机端");
+    await user.keyboard("{Enter}");
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(textarea).toHaveValue("手机端\n");
+  });
+
+  it("does not send while a text input method is composing", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(<Home />);
+    const textarea = screen.getByLabelText("输入问题");
+    await user.type(textarea, "ping");
+    fireEvent.keyDown(textarea, { key: "Enter", isComposing: true });
+
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(textarea).toHaveValue("ping");
   });
 
   it("renders assistant markdown without treating user markdown as formatting", async () => {

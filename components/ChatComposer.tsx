@@ -1,7 +1,7 @@
 "use client";
 
 import { Send } from "lucide-react";
-import type { FormEvent } from "react";
+import type { FormEvent, KeyboardEvent } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -14,12 +14,24 @@ export function ChatComposer({ disabled, onSend }: ChatComposerProps) {
   const [value, setValue] = useState("");
   const trimmed = value.trim();
 
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function sendCurrentMessage() {
     if (!trimmed || disabled) return;
 
     onSend(trimmed);
     setValue("");
+  }
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    sendCurrentMessage();
+  }
+
+  function handleTextareaKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
+    if (typeof window !== "undefined" && window.matchMedia?.("(pointer: coarse)").matches) return;
+
+    event.preventDefault();
+    sendCurrentMessage();
   }
 
   return (
@@ -36,6 +48,7 @@ export function ChatComposer({ disabled, onSend }: ChatComposerProps) {
           maxLength={1000}
           disabled={disabled}
           onChange={(event) => setValue(event.target.value)}
+          onKeyDown={handleTextareaKeyDown}
           rows={1}
         />
         <Button
