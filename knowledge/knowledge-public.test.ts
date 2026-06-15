@@ -44,11 +44,32 @@ describe("public knowledge base", () => {
     expect(publicText).not.toContain("腾讯表单二维码位");
   });
 
-  it("retrieves the right public topic for common booth questions", async () => {
+  it("keeps a complete 7x7 core framework source for theory questions", async () => {
+    const chunks = await loadKnowledgeChunks();
+    const text = chunks
+      .filter((chunk) => chunk.sourceId === "source-7x7-capability-theory")
+      .map((chunk) => `${chunk.title}\n${chunk.tags.join(" ")}\n${chunk.text}`)
+      .join("\n");
+
+    expect(text).toContain("7x7 矩阵是什么");
+    expect(text).toContain("横轴为什么是这七类人");
+    expect(text).toContain("纵轴为什么是这七种能力");
+    expect(text).toContain("马克思");
+    expect(text).toContain("西尔维娅·费代里奇");
+    expect(text).toContain("阿马蒂亚·森");
+    expect(text).toContain("玛莎·努斯鲍姆");
+    expect(text).toContain("哈里·布雷弗曼");
+    expect(text).toContain("不是产品列表");
+    expect(text).toContain("方向地图 / 纲领 / 调研框架");
+  });
+
+  it("retrieves relevant material for common booth questions", async () => {
     const chunks = await loadKnowledgeChunks();
 
     expect(retrieve("牛马互助协议是不是 1/3 价", chunks, { limit: 1 })[0]?.chunk.sourceId).toBe("cattle-license");
-    expect(retrieve("7x7 矩阵到底是产品吗", chunks, { limit: 1 })[0]?.chunk.sourceId).toBe("direction-map");
+    expect(retrieve("7x7 矩阵到底是产品吗", chunks, { limit: 1 })[0]?.chunk.sourceId).toBe(
+      "source-7x7-capability-theory",
+    );
     expect(retrieve("这次摆摊到底图啥", chunks, { limit: 1 })[0]?.chunk.sourceId).toBe("event-positioning");
   });
 
@@ -65,6 +86,12 @@ describe("public knowledge base", () => {
       "source-direction-map-handout",
     );
     expect(retrieve("7x7 纵轴为什么按被剥夺的能力划分，能力进路和努斯鲍姆是什么", chunks, { limit: 1 })[0]?.chunk.sourceId).toBe(
+      "source-7x7-capability-theory",
+    );
+    expect(retrieve("7x7 横轴为什么是这七类人，和马克思、费代里奇、去技能化有什么关系", chunks, { limit: 1 })[0]?.chunk.sourceId).toBe(
+      "source-7x7-capability-theory",
+    );
+    expect(retrieve("这张 7x7 表是不是产品列表，还是方向地图、纲领和调研框架", chunks, { limit: 1 })[0]?.chunk.sourceId).toBe(
       "source-7x7-capability-theory",
     );
     expect(retrieve("生产和消费那张传单讲的空着的一格是什么", chunks, { limit: 1 })[0]?.chunk.sourceId).toBe(
