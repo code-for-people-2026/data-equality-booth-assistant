@@ -30,6 +30,21 @@ describe("buildChatPrompt", () => {
     expect(prompt).toContain("AI 可能被用来提高监控和管理强度");
   });
 
+  it("guides each answer toward one relevant core document without forcing all three", () => {
+    const prompt = buildChatPrompt({
+      mode: "intro",
+      retrievedChunks: [],
+    });
+
+    expect(prompt).toContain("先直接回答用户当前问题");
+    expect(prompt).toContain("自然引向《数据平权宣言》《牛马互助协议》或 7x7 矩阵之一");
+    expect(prompt).toContain("只选择最相关的一份核心内容");
+    expect(prompt).toContain("不要在每次回答里同时硬塞三份");
+    expect(prompt).toContain("理念、为什么做、数据归谁、AI 红利");
+    expect(prompt).toContain("组织约束、工友价、1/3 价、怎么防止变质");
+    expect(prompt).toContain("具体做什么、服务谁、哪些人和哪些能力");
+  });
+
   it("includes traceable source metadata when retrieved material comes from a source document", () => {
     const prompt = buildChatPrompt({
       mode: "free",
