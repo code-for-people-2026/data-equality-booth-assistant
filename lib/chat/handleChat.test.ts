@@ -70,7 +70,7 @@ describe("handleChat", () => {
 
     expect(callModel).toHaveBeenCalledWith(
       expect.objectContaining({
-        maxTokens: 1200,
+        maxTokens: 2400,
         messages: expect.arrayContaining([
           expect.objectContaining({
             role: "system",
@@ -79,6 +79,31 @@ describe("handleChat", () => {
         ]),
       }),
     );
+  });
+
+  it("keeps all explicitly requested source documents in the prompt for combined full-text requests", async () => {
+    const callModel = vi.fn().mockResolvedValue("可以，我先分别说明这两份材料。");
+    await handleChat({
+      body: {
+        mode: "free",
+        message: "我想看完整版的宣言和牛马互助协议",
+        messages: [],
+        conversationSummary: "",
+      },
+      ip: "1.2.3.19",
+      now: 0,
+      callModel,
+    });
+
+    const systemPrompt = callModel.mock.calls[0]?.[0].messages.find(
+      (message: { role: string; content: string }) => message.role === "system",
+    )?.content;
+
+    expect(systemPrompt).toContain("来源ID：source-data-equality-manifesto");
+    expect(systemPrompt).toContain("来源ID：source-cattle-license");
+    expect(systemPrompt).toContain("数据平权宣言全文");
+    expect(systemPrompt).toContain("牛马互助协议全文");
+    expect(callModel).toHaveBeenCalledWith(expect.objectContaining({ maxTokens: 2400 }));
   });
 
   it("rejects overlong user input", async () => {
