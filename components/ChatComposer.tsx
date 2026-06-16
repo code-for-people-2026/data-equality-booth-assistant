@@ -1,7 +1,7 @@
 "use client";
 
 import { Send } from "lucide-react";
-import type { FormEvent } from "react";
+import type { FormEvent, KeyboardEvent } from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -14,18 +14,30 @@ export function ChatComposer({ disabled, onSend }: ChatComposerProps) {
   const [value, setValue] = useState("");
   const trimmed = value.trim();
 
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function sendCurrentMessage() {
     if (!trimmed || disabled) return;
 
     onSend(trimmed);
     setValue("");
   }
 
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    sendCurrentMessage();
+  }
+
+  function handleTextareaKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
+    if (typeof window !== "undefined" && window.matchMedia?.("(pointer: coarse)").matches) return;
+
+    event.preventDefault();
+    sendCurrentMessage();
+  }
+
   return (
-    <div className="fixed bottom-2.5 left-1/2 grid w-[min(calc(100%-24px),720px)] -translate-x-1/2 gap-2">
+    <div className="composer-shell">
       <form
-        className="grid grid-cols-[minmax(0,1fr)_48px] items-end gap-2.5 rounded-[28px] border border-input bg-popover/95 p-3.5 shadow-panel backdrop-blur-[18px] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/30"
+        className="grid grid-cols-[minmax(0,1fr)_48px] items-end gap-2.5 rounded-[28px] border border-input bg-popover p-3.5 shadow-panel backdrop-blur-[18px] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/30"
         onSubmit={submit}
       >
         <textarea
@@ -36,6 +48,7 @@ export function ChatComposer({ disabled, onSend }: ChatComposerProps) {
           maxLength={1000}
           disabled={disabled}
           onChange={(event) => setValue(event.target.value)}
+          onKeyDown={handleTextareaKeyDown}
           rows={1}
         />
         <Button
@@ -47,8 +60,10 @@ export function ChatComposer({ disabled, onSend }: ChatComposerProps) {
         >
           <Send aria-hidden="true" size={18} />
         </Button>
+        <p className="col-span-2 m-0 text-center text-xs leading-none text-muted-foreground">
+          内容由 AI 生成，请仔细甄别
+        </p>
       </form>
-      <p className="m-0 text-center text-xs leading-none text-muted-foreground">内容由 AI 生成，请仔细甄别</p>
     </div>
   );
 }

@@ -16,8 +16,11 @@ export function buildChatPrompt(input: {
   const materials = input.retrievedChunks.length
     ? input.retrievedChunks
         .map(
-          (item, index) =>
-            `材料 ${index + 1}\n标题：${item.chunk.title}\n来源ID：${item.chunk.sourceId}\n内容：${item.chunk.text}`,
+          (item, index) => {
+            const sourcePath = item.chunk.sourcePath ? `\n原始来源：${item.chunk.sourcePath}` : "";
+            const relatedSources = item.chunk.sources.length ? `\n关联来源：${item.chunk.sources.join("、")}` : "";
+            return `材料 ${index + 1}\n标题：${item.chunk.title}\n材料类型：${item.chunk.kind}\n来源ID：${item.chunk.sourceId}${sourcePath}${relatedSources}\n内容：${item.chunk.text}`;
+          },
         )
         .join("\n\n")
     : "没有检索到足够相关的摊位材料。";
@@ -29,6 +32,10 @@ export function buildChatPrompt(input: {
     "只基于摊位材料回答。材料不足时，温和说明材料没有充分展开，并把问题转回“数据平权，AI 下乡”“AI 到底服务谁”“为工友敲键盘想解决什么”等主题。",
     "默认不要展示材料来源。用户追问依据、来源、原文时，才说明材料来源。",
     "回答应克制、白话、短。不要喊口号，不要攻击其他立场，不要替项目做材料之外的承诺。",
+    "每次回答都沿着“接住问题 → 对应核心材料 → 自然邀请继续”的链路：先直接回答用户当前问题，再把问题自然引向《数据平权宣言》《牛马互助协议》或 7x7 矩阵之一。",
+    "只选择最相关的一份核心内容，不要在每次回答里同时硬塞三份。引导必须像顺着用户问题往下走，不要像营销话术。",
+    "核心内容路由参考：理念、为什么做、数据归谁、AI 红利，优先引向《数据平权宣言》；组织约束、工友价、1/3 价、怎么防止变质，优先引向《牛马互助协议》；具体做什么、服务谁、哪些人和哪些能力，优先引向 7x7 矩阵。",
+    "如果材料不足，先说明不足，再选择最接近的一份核心内容作为继续理解的入口，不要泛泛结束。",
     `当前入口模式：${modeLabels[input.mode]}`,
     input.conversationSummary ? `较早对话摘要：${input.conversationSummary}` : "较早对话摘要：无",
     "可用摊位材料：",

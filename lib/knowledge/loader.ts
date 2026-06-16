@@ -8,10 +8,14 @@ const metadataSchema = z.object({
   title: z.string().min(1),
   visibility: z.literal("public"),
   status: z.literal("approved"),
+  kind: z.enum(["topic", "source"]).default("topic"),
+  sources: z.array(z.string()).default([]),
+  source_path: z.string().min(1).optional(),
   tags: z.array(z.string()).default([]),
 });
 
-export type KnowledgeDocument = z.infer<typeof metadataSchema> & {
+export type KnowledgeDocument = Omit<z.infer<typeof metadataSchema>, "source_path"> & {
+  sourcePath?: string;
   content: string;
   filePath: string;
 };
@@ -20,13 +24,27 @@ export type KnowledgeChunk = {
   id: string;
   sourceId: string;
   title: string;
+  kind: "topic" | "source";
+  sources: string[];
+  sourcePath?: string;
   tags: string[];
   text: string;
   filePath: string;
 };
 
+const defaultPublicRoot = path.join(process.cwd(), "knowledge/public");
+const defaultSourceRoot = path.join(process.cwd(), "knowledge/sources");
+const defaultKnowledgeRoots = [defaultPublicRoot, defaultSourceRoot];
+
 async function listMarkdownFiles(dir: string): Promise<string[]> {
-  const entries = await fs.readdir(dir, { withFileTypes: true });
+  let entries;
+  try {
+    entries = await fs.readdir(dir, { withFileTypes: true });
+  } catch (error) {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") return [];
+    throw error;
+  }
+
   const files = await Promise.all(
     entries.map(async (entry) => {
       const fullPath = path.join(dir, entry.name);
@@ -39,8 +57,9 @@ async function listMarkdownFiles(dir: string): Promise<string[]> {
   return files.flat().sort();
 }
 
-export async function loadKnowledgeBase(rootDir = path.join(process.cwd(), "knowledge/public")) {
-  const files = await listMarkdownFiles(rootDir);
+export async function loadKnowledgeBase(rootDir: string | string[] = defaultPublicRoot) {
+  const rootDirs = Array.isArray(rootDir) ? rootDir : [rootDir];
+  const files = (await Promise.all(rootDirs.map((dir) => listMarkdownFiles(dir)))).flat().sort();
   const documents: KnowledgeDocument[] = [];
 
   for (const filePath of files) {
@@ -51,7 +70,18 @@ export async function loadKnowledgeBase(rootDir = path.join(process.cwd(), "know
     if (!metadata.success) continue;
 
     documents.push({
-      ...metadata.data,
+      id: metadata.data.id,
+      title: metadata.data.title,
+      visibility: metadata.data.visibility,
+      status: metadata.data.status,
+      kind: metadata.data.kind,
+      tags: metadata.data.tags,
+      sources: metadata.data.sources.length
+        ? metadata.data.sources
+        : metadata.data.source_path
+          ? [metadata.data.source_path]
+          : [],
+      sourcePath: metadata.data.source_path,
       content: parsed.content.trim(),
       filePath,
     });
@@ -88,13 +118,16 @@ export function splitIntoChunks(document: KnowledgeDocument): KnowledgeChunk[] {
       id: `${document.id}#${index}`,
       sourceId: document.id,
       title: document.title,
+      kind: document.kind,
+      sources: document.sources,
+      sourcePath: document.sourcePath,
       tags: document.tags,
       text,
       filePath: document.filePath,
     }));
 }
 
-export async function loadKnowledgeChunks(rootDir = path.join(process.cwd(), "knowledge/public")) {
+export async function loadKnowledgeChunks(rootDir: string | string[] = defaultKnowledgeRoots) {
   const documents = await loadKnowledgeBase(rootDir);
   return documents.flatMap(splitIntoChunks);
 }

@@ -34,6 +34,8 @@ const queryExpansions: Array<[RegExp, string[]]> = [
   [/资本|剥削|工具|平台/, ["数据", "平台", "价值", "平权"]],
   [/联系|加入|网站|后续|继续/, ["继续了解", "摊主", "联系方式"]],
   [/工友|劳动者|服务谁|代表/, ["工友", "普通劳动者", "服务对象"]],
+  [/用户调研|渠道侦察|现场人群|辩论赛现场|收集痛点/, ["用户调研", "渠道侦察", "辩论赛", "现场人群"]],
+  [/全文|完整版|原文|完整|全部/, ["全文", "原文", "完整", "source"]],
 ];
 
 type QueryToken = {
@@ -75,6 +77,22 @@ function scoreChunk(queryTokens: QueryToken[], chunk: KnowledgeChunk) {
   }, 0);
 }
 
+function compareChunkId(left: string, right: string) {
+  const [leftSource, leftIndex] = left.split("#");
+  const [rightSource, rightIndex] = right.split("#");
+
+  if (leftSource !== rightSource) return left.localeCompare(right);
+
+  const leftNumber = Number(leftIndex);
+  const rightNumber = Number(rightIndex);
+
+  if (Number.isFinite(leftNumber) && Number.isFinite(rightNumber)) {
+    return leftNumber - rightNumber;
+  }
+
+  return left.localeCompare(right);
+}
+
 export function retrieve(query: string, chunks: KnowledgeChunk[], options: RetrieveOptions = {}) {
   const limit = options.limit ?? 6;
   const minimumScore = options.minimumScore ?? 1;
@@ -85,6 +103,6 @@ export function retrieve(query: string, chunks: KnowledgeChunk[], options: Retri
   return chunks
     .map((chunk) => ({ chunk, score: scoreChunk(queryTokens, chunk) }))
     .filter((item) => item.score >= minimumScore)
-    .sort((a, b) => b.score - a.score || a.chunk.id.localeCompare(b.chunk.id))
+    .sort((a, b) => b.score - a.score || compareChunkId(a.chunk.id, b.chunk.id))
     .slice(0, limit);
 }
